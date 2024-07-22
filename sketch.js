@@ -1,25 +1,30 @@
-const COLUMNS = 29;
+const COLUMNS = 30;
 let shapes = [];
-let shapeSize = 30;
-let gridCols = 15;
-let gridRows = 10;
 let cellWidth, cellHeight;
+let shapeSize;
 
 function setup() {
-  createCanvas(900, 600);
+  createCanvas(windowWidth, windowHeight);
   background("#FA0041");
+
+  gridCols = COLUMNS;
   cellWidth = width / gridCols;
-  cellHeight = height / gridRows;
+  cellHeight = cellWidth * 1.8; // To maintain the aspect ratio similar to the original design
+  gridRows = ceil(height / cellHeight);
+  shapeSize = cellWidth * 0.8; // Adjust size to fit within the cells
 
   for (let col = 0; col < gridCols; col++) {
     for (let row = 0; row < gridRows; row++) {
       let x = col * cellWidth + cellWidth / 2;
       let y = row * cellHeight + cellHeight / 2;
 
-      if (random(1) > 0.5) {
-        shapes.push(new CircleShape(x, y, shapeSize / 2));
-      } else {
-        shapes.push(new PillShape(x, y, shapeSize));
+      if (y + shapeSize / 2 <= height) {
+        // Check to ensure shape does not overflow screen height
+        if (random(1) > 0.5) {
+          shapes.push(new CircleShape(x, y, shapeSize / 2));
+        } else {
+          shapes.push(new PillShape(x, y, shapeSize));
+        }
       }
     }
   }
@@ -56,4 +61,10 @@ class PillShape {
     rectMode(CENTER);
     rect(this.x, this.y, this.size, this.size * 1.8, this.size);
   }
+}
+
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
+  shapes = [];
+  setup();
 }

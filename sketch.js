@@ -1,5 +1,6 @@
 const COLUMNS = 30;
 const VERTICAL_GAP = 20; // Consistent vertical gap between shapes
+const LEFT_MARGIN = 50; // Space on the left side of the first column
 let shapes = [];
 let cellWidth, cellHeight;
 let shapeSize;
@@ -9,7 +10,7 @@ function setup() {
   background("#FA0041");
 
   gridCols = COLUMNS;
-  cellWidth = width / gridCols;
+  cellWidth = (width - LEFT_MARGIN) / gridCols; // Adjust cellWidth to account for the left margin
   cellHeight = cellWidth * 1.8; // To maintain the aspect ratio similar to the original design
   shapeSize = cellWidth * 0.8; // Adjust size to fit within the cells
 
@@ -22,7 +23,7 @@ function setup() {
     let y = VERTICAL_GAP / 2; // Start y position with the first gap
 
     while (y + shapeSize / 2 <= height) {
-      let x = col * cellWidth + cellWidth / 2;
+      let x = col * cellWidth + cellWidth / 2 + LEFT_MARGIN; // Add LEFT_MARGIN to x position
 
       // Randomly decide to skip this row
       if (random(1) > 0.2) {

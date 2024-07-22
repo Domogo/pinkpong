@@ -1,29 +1,41 @@
 const COLUMNS = 30;
+const VERTICAL_GAP = 20; // Consistent vertical gap between shapes
 let shapes = [];
 let cellWidth, cellHeight;
 let shapeSize;
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
-  background("#FA0041");
 
   gridCols = COLUMNS;
   cellWidth = width / gridCols;
   cellHeight = cellWidth * 1.8; // To maintain the aspect ratio similar to the original design
-  gridRows = ceil(height / cellHeight);
   shapeSize = cellWidth * 0.8; // Adjust size to fit within the cells
 
   for (let col = 0; col < gridCols; col++) {
-    for (let row = 0; row < gridRows; row++) {
-      let x = col * cellWidth + cellWidth / 2;
-      let y = row * cellHeight + cellHeight / 2;
+    if (col % 3 === 2) {
+      // Skip every third column (0-based index)
+      continue;
+    }
 
-      if (y + shapeSize / 2 <= height) {
-        // Check to ensure shape does not overflow screen height
-        if (random(1) > 0.5) {
-          shapes.push(new CircleShape(x, y, shapeSize / 2));
+    let y = VERTICAL_GAP / 2; // Start y position with the first gap
+
+    while (y + shapeSize / 2 <= height) {
+      let x = col * cellWidth + cellWidth / 2;
+
+      if (random(1) > 0.5) {
+        if (y + shapeSize <= height) {
+          shapes.push(new CircleShape(x, y + shapeSize / 2, shapeSize / 2));
+          y += shapeSize + VERTICAL_GAP; // Move to the next position including the gap
         } else {
-          shapes.push(new PillShape(x, y, shapeSize));
+          break;
+        }
+      } else {
+        if (y + shapeSize * 1.8 <= height) {
+          shapes.push(new PillShape(x, y + shapeSize * 0.9, shapeSize));
+          y += shapeSize * 1.8 + VERTICAL_GAP; // Move to the next position including the gap
+        } else {
+          break;
         }
       }
     }

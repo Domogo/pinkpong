@@ -26,7 +26,7 @@ function setup() {
       let x = col * cellWidth + cellWidth / 2 + LEFT_MARGIN; // Add LEFT_MARGIN to x position
 
       // Randomly decide to skip this row
-      if (random(1) > 0.2) {
+      if (random(1) > 0.1) {
         // 80% chance to place a shape, 20% to skip
         if (random(1) > 0.5) {
           if (y + shapeSize <= height) {
@@ -36,9 +36,12 @@ function setup() {
             break;
           }
         } else {
-          if (y + shapeSize * 1.8 <= height) {
-            shapes.push(new PillShape(x, y + shapeSize * 0.9, shapeSize));
-            y += shapeSize * 1.8 + VERTICAL_GAP; // Move to the next position including the gap
+          let pillHeight = 2.1 * shapeSize + VERTICAL_GAP;
+          if (y + pillHeight <= height) {
+            shapes.push(
+              new PillShape(x, y + pillHeight / 2, shapeSize, pillHeight)
+            );
+            y += pillHeight + VERTICAL_GAP; // Move to the next position including the gap
           } else {
             break;
           }
@@ -69,17 +72,18 @@ class CircleShape {
 }
 
 class PillShape {
-  constructor(x, y, size) {
+  constructor(x, y, size, height) {
     this.x = x;
     this.y = y;
     this.size = size;
+    this.height = height;
   }
 
   display() {
     fill(255);
     noStroke();
     rectMode(CENTER);
-    rect(this.x, this.y, this.size, this.size * 1.8, this.size);
+    rect(this.x, this.y, this.size, this.height, this.size);
   }
 }
 

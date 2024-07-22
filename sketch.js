@@ -6,6 +6,7 @@ let shapeSize;
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
+  background("#FA0041");
 
   gridCols = COLUMNS;
   cellWidth = width / gridCols;
@@ -23,20 +24,26 @@ function setup() {
     while (y + shapeSize / 2 <= height) {
       let x = col * cellWidth + cellWidth / 2;
 
-      if (random(1) > 0.5) {
-        if (y + shapeSize <= height) {
-          shapes.push(new CircleShape(x, y + shapeSize / 2, shapeSize / 2));
-          y += shapeSize + VERTICAL_GAP; // Move to the next position including the gap
+      // Randomly decide to skip this row
+      if (random(1) > 0.2) {
+        // 80% chance to place a shape, 20% to skip
+        if (random(1) > 0.5) {
+          if (y + shapeSize <= height) {
+            shapes.push(new CircleShape(x, y + shapeSize / 2, shapeSize / 2));
+            y += shapeSize + VERTICAL_GAP; // Move to the next position including the gap
+          } else {
+            break;
+          }
         } else {
-          break;
+          if (y + shapeSize * 1.8 <= height) {
+            shapes.push(new PillShape(x, y + shapeSize * 0.9, shapeSize));
+            y += shapeSize * 1.8 + VERTICAL_GAP; // Move to the next position including the gap
+          } else {
+            break;
+          }
         }
       } else {
-        if (y + shapeSize * 1.8 <= height) {
-          shapes.push(new PillShape(x, y + shapeSize * 0.9, shapeSize));
-          y += shapeSize * 1.8 + VERTICAL_GAP; // Move to the next position including the gap
-        } else {
-          break;
-        }
+        y += shapeSize + VERTICAL_GAP; // Move to the next position including the gap if skipping
       }
     }
   }

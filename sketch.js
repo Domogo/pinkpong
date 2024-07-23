@@ -3,7 +3,6 @@ const VERTICAL_GAP = 20; // Consistent vertical gap between shapes
 const LEFT_MARGIN = 50; // Space on the left side of the first column
 const FORCE_FIELD_RADIUS = 300; // Radius of the invisible force field
 const FRICTION = 0.95; // Friction coefficient to gradually stop the shapes
-const COLLISION_DAMPING = 0.5; // Damping factor for collision response
 let shapes = [];
 let cellWidth, cellHeight;
 let shapeSize;
@@ -108,26 +107,17 @@ class CircleShape extends Shape {
   }
 
   checkCollision(other) {
-    let d, minDist, angle, overlap, vxTotal, vyTotal;
+    let d, minDist, angle, overlap;
     if (other instanceof CircleShape) {
       d = dist(this.x, this.y, other.x, other.y);
       minDist = this.r + other.r;
       if (d < minDist) {
         angle = atan2(other.y - this.y, other.x - this.x);
-        overlap = 0.5 * (d - minDist);
+        overlap = 0.5 * (minDist - d);
         this.x -= overlap * cos(angle);
         this.y -= overlap * sin(angle);
         other.x += overlap * cos(angle);
         other.y += overlap * sin(angle);
-
-        vxTotal = this.vx - other.vx;
-        vyTotal = this.vy - other.vy;
-        let transferVx = vxTotal * COLLISION_DAMPING;
-        let transferVy = vyTotal * COLLISION_DAMPING;
-        this.vx -= transferVx;
-        this.vy -= transferVy;
-        other.vx += transferVx;
-        other.vy += transferVy;
       }
     }
     if (other instanceof PillShape) {
@@ -135,20 +125,11 @@ class CircleShape extends Shape {
       minDist = this.r + other.size / 2;
       if (d < minDist) {
         angle = atan2(other.y - this.y, other.x - this.x);
-        overlap = 0.5 * (d - minDist);
+        overlap = 0.5 * (minDist - d);
         this.x -= overlap * cos(angle);
         this.y -= overlap * sin(angle);
         other.x += overlap * cos(angle);
         other.y += overlap * sin(angle);
-
-        vxTotal = this.vx - other.vx;
-        vyTotal = this.vy - other.vy;
-        let transferVx = vxTotal * COLLISION_DAMPING;
-        let transferVy = vyTotal * COLLISION_DAMPING;
-        this.vx -= transferVx;
-        this.vy -= transferVy;
-        other.vx += transferVx;
-        other.vy += transferVy;
       }
     }
   }
@@ -169,26 +150,17 @@ class PillShape extends Shape {
   }
 
   checkCollision(other) {
-    let d, minDist, angle, overlap, vxTotal, vyTotal;
+    let d, minDist, angle, overlap;
     if (other instanceof CircleShape) {
       d = dist(this.x, this.y, other.x, other.y);
       minDist = this.size / 2 + other.r;
       if (d < minDist) {
         angle = atan2(other.y - this.y, other.x - this.x);
-        overlap = 0.5 * (d - minDist);
+        overlap = 0.5 * (minDist - d);
         this.x -= overlap * cos(angle);
         this.y -= overlap * sin(angle);
         other.x += overlap * cos(angle);
         other.y += overlap * sin(angle);
-
-        vxTotal = this.vx - other.vx;
-        vyTotal = this.vy - other.vy;
-        let transferVx = vxTotal * COLLISION_DAMPING;
-        let transferVy = vyTotal * COLLISION_DAMPING;
-        this.vx -= transferVx;
-        this.vy -= transferVy;
-        other.vx += transferVx;
-        other.vy += transferVy;
       }
     }
     if (other instanceof PillShape) {
@@ -196,20 +168,11 @@ class PillShape extends Shape {
       minDist = this.size / 2 + other.size / 2;
       if (d < minDist) {
         angle = atan2(other.y - this.y, other.x - this.x);
-        overlap = 0.5 * (d - minDist);
+        overlap = 0.5 * (minDist - d);
         this.x -= overlap * cos(angle);
         this.y -= overlap * sin(angle);
         other.x += overlap * cos(angle);
         other.y += overlap * sin(angle);
-
-        vxTotal = this.vx - other.vx;
-        vyTotal = this.vy - other.vy;
-        let transferVx = vxTotal * COLLISION_DAMPING;
-        let transferVy = vyTotal * COLLISION_DAMPING;
-        this.vx -= transferVx;
-        this.vy -= transferVy;
-        other.vx += transferVx;
-        other.vy += transferVy;
       }
     }
   }

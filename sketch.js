@@ -3,6 +3,7 @@ const VERTICAL_GAP = 20; // Consistent vertical gap between shapes
 const LEFT_MARGIN = 50; // Space on the left side of the first column
 const FORCE_FIELD_RADIUS = 300; // Radius of the invisible force field
 const FRICTION = 0.95; // Friction coefficient to gradually stop the shapes
+const COLLISION_BUFFER = 5; // Additional buffer to prevent overlap
 let shapes = [];
 let cellWidth, cellHeight;
 let shapeSize;
@@ -110,7 +111,7 @@ class CircleShape extends Shape {
     let d, minDist, angle, overlap;
     if (other instanceof CircleShape) {
       d = dist(this.x, this.y, other.x, other.y);
-      minDist = this.r + other.r;
+      minDist = this.r + other.r + COLLISION_BUFFER;
       if (d < minDist) {
         angle = atan2(other.y - this.y, other.x - this.x);
         overlap = 0.5 * (minDist - d);
@@ -122,7 +123,7 @@ class CircleShape extends Shape {
     }
     if (other instanceof PillShape) {
       d = dist(this.x, this.y, other.x, other.y);
-      minDist = this.r + other.size / 2;
+      minDist = this.r + other.size / 2 + COLLISION_BUFFER;
       if (d < minDist) {
         angle = atan2(other.y - this.y, other.x - this.x);
         overlap = 0.5 * (minDist - d);
@@ -153,7 +154,7 @@ class PillShape extends Shape {
     let d, minDist, angle, overlap;
     if (other instanceof CircleShape) {
       d = dist(this.x, this.y, other.x, other.y);
-      minDist = this.size / 2 + other.r;
+      minDist = this.size / 2 + other.r + COLLISION_BUFFER;
       if (d < minDist) {
         angle = atan2(other.y - this.y, other.x - this.x);
         overlap = 0.5 * (minDist - d);
@@ -165,7 +166,7 @@ class PillShape extends Shape {
     }
     if (other instanceof PillShape) {
       d = dist(this.x, this.y, other.x, other.y);
-      minDist = this.size / 2 + other.size / 2;
+      minDist = this.size / 2 + other.size / 2 + COLLISION_BUFFER;
       if (d < minDist) {
         angle = atan2(other.y - this.y, other.x - this.x);
         overlap = 0.5 * (minDist - d);

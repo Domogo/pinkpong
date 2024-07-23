@@ -3,6 +3,7 @@ const VERTICAL_GAP = 20; // Consistent vertical gap between shapes
 const LEFT_MARGIN = 50; // Space on the left side of the first column
 const FORCE_FIELD_RADIUS = 300; // Radius of the invisible force field
 const FRICTION = 0.95; // Friction coefficient to gradually stop the shapes
+const COLLISION_DAMPING = 0.5; // Damping factor for collision response
 let shapes = [];
 let cellWidth, cellHeight;
 let shapeSize;
@@ -59,23 +60,23 @@ function draw() {
   background("#FA0041");
   for (let shape of shapes) {
     shape.update();
+  }
+  for (let i = 0; i < shapes.length; i++) {
+    for (let j = i + 1; j < shapes.length; j++) {
+      shapes[i].checkCollision(shapes[j]);
+    }
+  }
+  for (let shape of shapes) {
     shape.display();
   }
 }
 
-class CircleShape {
-  constructor(x, y, r) {
+class Shape {
+  constructor(x, y) {
     this.x = x;
     this.y = y;
-    this.r = r;
     this.vx = 0;
     this.vy = 0;
-  }
-
-  display() {
-    fill(255);
-    noStroke();
-    ellipse(this.x, this.y, this.r * 2);
   }
 
   move(dx, dy) {
@@ -88,17 +89,76 @@ class CircleShape {
     this.y += this.vy;
     this.vx *= FRICTION;
     this.vy *= FRICTION;
+
+    if (abs(this.vx) < 0.01) this.vx = 0;
+    if (abs(this.vy) < 0.01) this.vy = 0;
   }
 }
 
-class PillShape {
+class CircleShape extends Shape {
+  constructor(x, y, r) {
+    super(x, y);
+    this.r = r;
+  }
+
+  display() {
+    fill(255);
+    noStroke();
+    ellipse(this.x, this.y, this.r * 2);
+  }
+
+  checkCollision(other) {
+    let d, minDist, angle, overlap, vxTotal, vyTotal;
+    if (other instanceof CircleShape) {
+      d = dist(this.x, this.y, other.x, other.y);
+      minDist = this.r + other.r;
+      if (d < minDist) {
+        angle = atan2(other.y - this.y, other.x - this.x);
+        overlap = 0.5 * (d - minDist);
+        this.x -= overlap * cos(angle);
+        this.y -= overlap * sin(angle);
+        other.x += overlap * cos(angle);
+        other.y += overlap * sin(angle);
+
+        vxTotal = this.vx - other.vx;
+        vyTotal = this.vy - other.vy;
+        let transferVx = vxTotal * COLLISION_DAMPING;
+        let transferVy = vyTotal * COLLISION_DAMPING;
+        this.vx -= transferVx;
+        this.vy -= transferVy;
+        other.vx += transferVx;
+        other.vy += transferVy;
+      }
+    }
+    if (other instanceof PillShape) {
+      d = dist(this.x, this.y, other.x, other.y);
+      minDist = this.r + other.size / 2;
+      if (d < minDist) {
+        angle = atan2(other.y - this.y, other.x - this.x);
+        overlap = 0.5 * (d - minDist);
+        this.x -= overlap * cos(angle);
+        this.y -= overlap * sin(angle);
+        other.x += overlap * cos(angle);
+        other.y += overlap * sin(angle);
+
+        vxTotal = this.vx - other.vx;
+        vyTotal = this.vy - other.vy;
+        let transferVx = vxTotal * COLLISION_DAMPING;
+        let transferVy = vyTotal * COLLISION_DAMPING;
+        this.vx -= transferVx;
+        this.vy -= transferVy;
+        other.vx += transferVx;
+        other.vy += transferVy;
+      }
+    }
+  }
+}
+
+class PillShape extends Shape {
   constructor(x, y, size, height) {
-    this.x = x;
-    this.y = y;
+    super(x, y);
     this.size = size;
     this.height = height;
-    this.vx = 0;
-    this.vy = 0;
   }
 
   display() {
@@ -108,16 +168,50 @@ class PillShape {
     rect(this.x, this.y, this.size, this.height, this.size);
   }
 
-  move(dx, dy) {
-    this.vx += dx;
-    this.vy += dy;
-  }
+  checkCollision(other) {
+    let d, minDist, angle, overlap, vxTotal, vyTotal;
+    if (other instanceof CircleShape) {
+      d = dist(this.x, this.y, other.x, other.y);
+      minDist = this.size / 2 + other.r;
+      if (d < minDist) {
+        angle = atan2(other.y - this.y, other.x - this.x);
+        overlap = 0.5 * (d - minDist);
+        this.x -= overlap * cos(angle);
+        this.y -= overlap * sin(angle);
+        other.x += overlap * cos(angle);
+        other.y += overlap * sin(angle);
 
-  update() {
-    this.x += this.vx;
-    this.y += this.vy;
-    this.vx *= FRICTION;
-    this.vy *= FRICTION;
+        vxTotal = this.vx - other.vx;
+        vyTotal = this.vy - other.vy;
+        let transferVx = vxTotal * COLLISION_DAMPING;
+        let transferVy = vyTotal * COLLISION_DAMPING;
+        this.vx -= transferVx;
+        this.vy -= transferVy;
+        other.vx += transferVx;
+        other.vy += transferVy;
+      }
+    }
+    if (other instanceof PillShape) {
+      d = dist(this.x, this.y, other.x, other.y);
+      minDist = this.size / 2 + other.size / 2;
+      if (d < minDist) {
+        angle = atan2(other.y - this.y, other.x - this.x);
+        overlap = 0.5 * (d - minDist);
+        this.x -= overlap * cos(angle);
+        this.y -= overlap * sin(angle);
+        other.x += overlap * cos(angle);
+        other.y += overlap * sin(angle);
+
+        vxTotal = this.vx - other.vx;
+        vyTotal = this.vy - other.vy;
+        let transferVx = vxTotal * COLLISION_DAMPING;
+        let transferVy = vyTotal * COLLISION_DAMPING;
+        this.vx -= transferVx;
+        this.vy -= transferVy;
+        other.vx += transferVx;
+        other.vy += transferVy;
+      }
+    }
   }
 }
 

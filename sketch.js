@@ -1,59 +1,51 @@
 const COLUMNS = 30;
 const VERTICAL_GAP = 20; // Consistent vertical gap between shapes
-const LEFT_MARGIN = 50; // Space on the left side of the first column
 const FORCE_FIELD_RADIUS = 300; // Radius of the invisible force field
 const FRICTION = 0.95; // Friction coefficient to gradually stop the shapes
-const COLLISION_BUFFER = 5; // Additional buffer to prevent overlap
+const COLLISION_BUFFER = 0; // Additional buffer to prevent overlap
 let shapes = [];
 let cellWidth, cellHeight;
 let shapeSize;
+const SIDE_BUFFER = 50; // Adjust this value to increase or decrease the space
 
 let leftRect, rightRect;
-const RECT_WIDTH = 100;
+const RECT_WIDTH = 50;
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
   background("#FA0041");
 
   gridCols = COLUMNS;
-  cellWidth = (width - LEFT_MARGIN) / gridCols; // Adjust cellWidth to account for the left margin
-  cellHeight = cellWidth * 1.8; // To maintain the aspect ratio similar to the original design
-  shapeSize = cellWidth * 0.8; // Adjust size to fit within the cells
+  let availableWidth = width - 2 * SIDE_BUFFER; // Available width for shapes
+  cellWidth = availableWidth / gridCols;
+  cellHeight = height / Math.floor(height / (cellWidth * 1.8));
+  shapeSize = cellWidth * 0.8;
 
   for (let col = 0; col < gridCols; col++) {
-    if (col % 3 === 2) {
-      // Skip every third column (0-based index)
-      continue;
-    }
+    if (col % 3 === 2) continue;
 
-    let y = VERTICAL_GAP / 2; // Start y position with the first gap
+    let y = 0;
 
-    while (y + shapeSize / 2 <= height) {
-      let x = col * cellWidth + cellWidth / 2 + LEFT_MARGIN; // Add LEFT_MARGIN to x position
+    while (y + shapeSize <= height) {
+      let x = SIDE_BUFFER + col * cellWidth + cellWidth / 2; // Add SIDE_BUFFER to x position
 
-      // Randomly decide to skip this row
       if (random(1) > 0.2) {
-        // 80% chance to place a shape, 20% to skip
         if (random(1) > 0.5) {
-          if (y + shapeSize <= height) {
-            shapes.push(new CircleShape(x, y + shapeSize / 2, shapeSize / 2));
-            y += shapeSize + VERTICAL_GAP; // Move to the next position including the gap
-          } else {
-            break;
-          }
+          shapes.push(new CircleShape(x, y + shapeSize / 2, shapeSize / 2));
+          y += shapeSize + VERTICAL_GAP;
         } else {
-          let pillHeight = 2.1 * shapeSize + VERTICAL_GAP;
+          let pillHeight = 2.1 * shapeSize;
           if (y + pillHeight <= height) {
             shapes.push(
               new PillShape(x, y + pillHeight / 2, shapeSize, pillHeight)
             );
-            y += pillHeight + VERTICAL_GAP; // Move to the next position including the gap
+            y += pillHeight + VERTICAL_GAP;
           } else {
             break;
           }
         }
       } else {
-        y += shapeSize + VERTICAL_GAP; // Move to the next position including the gap if skipping
+        y += shapeSize + VERTICAL_GAP;
       }
     }
   }
@@ -65,7 +57,6 @@ function setup() {
 function draw() {
   background("#FA0041");
 
-  // Update and display shapes
   for (let shape of shapes) {
     shape.update();
   }
@@ -78,15 +69,20 @@ function draw() {
     shape.display();
   }
 
-  // Check collisions with draggable rectangles
   for (let shape of shapes) {
     leftRect.checkCollision(shape);
     rightRect.checkCollision(shape);
   }
 
-  // Display draggable rectangles
   leftRect.display();
   rightRect.display();
+
+  // Change cursor if over a draggable rect
+  if (leftRect.isMouseOver() || rightRect.isMouseOver()) {
+    cursor(HAND);
+  } else {
+    cursor(ARROW);
+  }
 }
 
 class Shape {
@@ -250,8 +246,9 @@ class DraggableRect {
   }
 
   display() {
-    fill(255);
+    fill(255, 255, 255, 100);
     noStroke();
+    rectMode(CENTER);
     rect(this.x, this.y, this.w, this.h);
   }
 
@@ -278,6 +275,15 @@ class DraggableRect {
     }
   }
 
+  isMouseOver() {
+    return (
+      mouseX > this.x &&
+      mouseX < this.x + this.w &&
+      mouseY > this.y &&
+      mouseY < this.y + this.h
+    );
+  }
+
   checkCollision(shape) {
     if (shape instanceof CircleShape) {
       if (
@@ -286,7 +292,13 @@ class DraggableRect {
         this.y < shape.y + shape.r &&
         this.y + this.h > shape.y - shape.r
       ) {
-        shape.x = this.x + this.w + shape.r + COLLISION_BUFFER;
+        if (this.x > width / 2) {
+          // Right rectangle
+          shape.x = this.x - this.w - shape.r - COLLISION_BUFFER;
+        } else {
+          // Left rectangle
+          shape.x = this.x + this.w + shape.r;
+        }
       }
     } else if (shape instanceof PillShape) {
       if (
@@ -295,7 +307,13 @@ class DraggableRect {
         this.y < shape.y + shape.height / 2 &&
         this.y + this.h > shape.y - shape.height / 2
       ) {
-        shape.x = this.x + this.w + shape.size / 2 + COLLISION_BUFFER;
+        if (this.x > width / 2) {
+          // Right rectangle
+          shape.x = this.x - shape.size / 2 - COLLISION_BUFFER;
+        } else {
+          // Left rectangle
+          shape.x = this.x + this.w + shape.size / 2;
+        }
       }
     }
   }

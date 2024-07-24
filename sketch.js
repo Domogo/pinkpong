@@ -4,15 +4,15 @@ const VERTICAL_GAP = 20; // Consistent vertical gap between shapes
 const FORCE_FIELD_RADIUS = 300; // Radius of the invisible force field
 const FRICTION = 0.95; // Friction coefficient to gradually stop the shapes
 const COLLISION_BUFFER = 0; // Additional buffer to prevent overlap
+const MAX_SPEED = 29;
+const GRAVITY = 0.2; // Gravity force applied to shapes on collision
+const SIDE_BUFFER = 50; // Adjust this value to increase or decrease the space
+const RECT_WIDTH = 60; // Width of draggable rectangles
+
 let shapes = [];
 let cellWidth, cellHeight;
 let shapeSize;
-const SIDE_BUFFER = 50; // Adjust this value to increase or decrease the space
-
-const MAX_SPEED = 29;
-
 let leftRect, rightRect;
-const RECT_WIDTH = 60;
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
@@ -63,11 +63,13 @@ function draw() {
   for (let shape of shapes) {
     shape.update();
   }
+
   for (let i = 0; i < shapes.length; i++) {
     for (let j = i + 1; j < shapes.length; j++) {
       shapes[i].checkCollision(shapes[j]);
     }
   }
+
   for (let shape of shapes) {
     shape.display();
   }
@@ -91,6 +93,7 @@ class Shape {
     this.y = y;
     this.vx = 0;
     this.vy = 0;
+    this.gravity = 0; // Initialize gravity to 0
   }
 
   move(dx, dy) {
@@ -98,7 +101,12 @@ class Shape {
     this.vy += dy;
   }
 
+  applyGravity() {
+    this.vy += this.gravity; // Apply gravity to the vertical velocity
+  }
+
   update() {
+    this.applyGravity();
     this.x += this.vx;
     this.y += this.vy;
     this.vx *= FRICTION;
@@ -296,6 +304,7 @@ class DraggableRect {
   }
 
   display() {
+    // Optional: Uncomment for debugging
     // fill(255, 255, 255, 100);
     // noStroke();
     // rectMode(CENTER);
@@ -375,6 +384,11 @@ class DraggableRect {
           shape.x = this.x + this.w + shape.r;
         }
         shape.vx = 0; // Stop the shape's horizontal velocity
+        shape.vy *= 0.8; // Reduce the vertical velocity slightly
+
+        // Apply gravity after collision
+        shape.gravity = GRAVITY;
+
         break;
       }
     }
@@ -399,6 +413,11 @@ class DraggableRect {
           shape.x = this.x + this.w + shape.size / 2;
         }
         shape.vx = 0; // Stop the shape's horizontal velocity
+        shape.vy *= 0.8; // Reduce the vertical velocity slightly
+
+        // Apply gravity after collision
+        shape.gravity = GRAVITY;
+
         break;
       }
     }

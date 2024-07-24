@@ -53,8 +53,14 @@ function setup() {
     }
   }
 
-  leftRect = new DraggableRect(0, 0, RECT_WIDTH, height);
-  rightRect = new DraggableRect(width - RECT_WIDTH, 0, RECT_WIDTH, height);
+  leftRect = new DraggableRect(0, 0, RECT_WIDTH, height, "left");
+  rightRect = new DraggableRect(
+    width - RECT_WIDTH,
+    0,
+    RECT_WIDTH,
+    height,
+    "right"
+  );
 }
 
 function draw() {
@@ -293,11 +299,12 @@ class PillShape extends Shape {
 }
 
 class DraggableRect {
-  constructor(x, y, w, h) {
+  constructor(x, y, w, h, position) {
     this.x = x;
     this.y = y;
     this.w = w;
     this.h = h;
+    this.position = position;
     this.isDragging = false;
     this.dragOffsetX = 0;
     this.prevX = x; // Store previous x position
@@ -376,7 +383,7 @@ class DraggableRect {
         this.y < shape.y + shape.r &&
         this.y + this.h > shape.y - shape.r
       ) {
-        if (this.x > width / 2) {
+        if (this.position === "right") {
           // Right rectangle
           shape.x = this.x - this.w - shape.r - COLLISION_BUFFER;
         } else {
@@ -405,7 +412,7 @@ class DraggableRect {
         this.y < shape.y + shape.height / 2 &&
         this.y + this.h > shape.y - shape.height / 2
       ) {
-        if (this.x > width / 2) {
+        if (this.position === "right") {
           // Right rectangle
           shape.x = this.x - this.w - shape.size / 2 - COLLISION_BUFFER;
         } else {

@@ -8,6 +8,9 @@ let shapes = [];
 let cellWidth, cellHeight;
 let shapeSize;
 
+let leftRect, rightRect;
+const RECT_WIDTH = 100;
+
 function setup() {
   createCanvas(windowWidth, windowHeight);
   background("#FA0041");
@@ -54,10 +57,15 @@ function setup() {
       }
     }
   }
+
+  leftRect = new DraggableRect(0, 0, RECT_WIDTH, height);
+  rightRect = new DraggableRect(width - RECT_WIDTH, 0, RECT_WIDTH, height);
 }
 
 function draw() {
   background("#FA0041");
+
+  // Update and display shapes
   for (let shape of shapes) {
     shape.update();
   }
@@ -69,6 +77,16 @@ function draw() {
   for (let shape of shapes) {
     shape.display();
   }
+
+  // Check collisions with draggable rectangles
+  for (let shape of shapes) {
+    leftRect.checkCollision(shape);
+    rightRect.checkCollision(shape);
+  }
+
+  // Display draggable rectangles
+  leftRect.display();
+  rightRect.display();
 }
 
 class Shape {
@@ -221,21 +239,103 @@ class PillShape extends Shape {
   }
 }
 
-function mousePressed() {
-  for (let shape of shapes) {
-    let d = dist(mouseX, mouseY, shape.x, shape.y);
-    if (d < FORCE_FIELD_RADIUS) {
-      let angle = atan2(shape.y - mouseY, shape.x - mouseX);
-      let force = map(d, 0, FORCE_FIELD_RADIUS, 15, 0);
-      let dx = cos(angle) * force;
-      let dy = sin(angle) * force;
-      shape.move(dx, dy);
+class DraggableRect {
+  constructor(x, y, w, h) {
+    this.x = x;
+    this.y = y;
+    this.w = w;
+    this.h = h;
+    this.isDragging = false;
+    this.dragOffsetX = 0;
+  }
+
+  display() {
+    fill(255);
+    noStroke();
+    rect(this.x, this.y, this.w, this.h);
+  }
+
+  checkDrag(mx, my) {
+    if (
+      mx > this.x &&
+      mx < this.x + this.w &&
+      my > this.y &&
+      my < this.y + this.h
+    ) {
+      this.isDragging = true;
+      this.dragOffsetX = mx - this.x;
     }
   }
+
+  stopDrag() {
+    this.isDragging = false;
+  }
+
+  drag(mx) {
+    if (this.isDragging) {
+      this.x = mx - this.dragOffsetX;
+      this.x = constrain(this.x, 0, width - this.w);
+    }
+  }
+
+  checkCollision(shape) {
+    if (shape instanceof CircleShape) {
+      if (
+        this.x < shape.x + shape.r &&
+        this.x + this.w > shape.x - shape.r &&
+        this.y < shape.y + shape.r &&
+        this.y + this.h > shape.y - shape.r
+      ) {
+        shape.x = this.x + this.w + shape.r + COLLISION_BUFFER;
+      }
+    } else if (shape instanceof PillShape) {
+      if (
+        this.x < shape.x + shape.size / 2 &&
+        this.x + this.w > shape.x - shape.size / 2 &&
+        this.y < shape.y + shape.height / 2 &&
+        this.y + this.h > shape.y - shape.height / 2
+      ) {
+        shape.x = this.x + this.w + shape.size / 2 + COLLISION_BUFFER;
+      }
+    }
+  }
+}
+
+function mousePressed() {
+  leftRect.checkDrag(mouseX, mouseY);
+  rightRect.checkDrag(mouseX, mouseY);
+
+  if (!leftRect.isDragging && !rightRect.isDragging) {
+    for (let shape of shapes) {
+      let d = dist(mouseX, mouseY, shape.x, shape.y);
+      if (d < FORCE_FIELD_RADIUS) {
+        let angle = atan2(shape.y - mouseY, shape.x - mouseX);
+        let force = map(d, 0, FORCE_FIELD_RADIUS, 15, 0);
+        let dx = cos(angle) * force;
+        let dy = sin(angle) * force;
+        shape.move(dx, dy);
+      }
+    }
+  }
+}
+
+function mouseDragged() {
+  leftRect.drag(mouseX);
+  rightRect.drag(mouseX);
+}
+
+function mouseReleased() {
+  leftRect.stopDrag();
+  rightRect.stopDrag();
 }
 
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
   shapes = [];
   setup();
+  leftRect.y = 0;
+  leftRect.h = height;
+  rightRect.x = width - RECT_WIDTH;
+  rightRect.y = 0;
+  rightRect.h = height;
 }

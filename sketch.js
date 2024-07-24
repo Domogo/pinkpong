@@ -9,7 +9,7 @@ let cellWidth, cellHeight;
 let shapeSize;
 const SIDE_BUFFER = 50; // Adjust this value to increase or decrease the space
 
-const MAX_SPEED = 20;
+const MAX_SPEED = 29;
 
 let leftRect, rightRect;
 const RECT_WIDTH = 60;
@@ -283,6 +283,7 @@ class PillShape extends Shape {
     }
   }
 }
+
 class DraggableRect {
   constructor(x, y, w, h) {
     this.x = x;
@@ -320,8 +321,21 @@ class DraggableRect {
   drag(mx) {
     if (this.isDragging) {
       this.prevX = this.x; // Update previous x position before changing
-      this.x = mx - this.dragOffsetX;
-      this.x = constrain(this.x, 0, width - this.w);
+
+      // Calculate new position
+      let newX = mx - this.dragOffsetX;
+      newX = constrain(newX, 0, width - this.w);
+
+      // Calculate velocity
+      let velocity = newX - this.prevX;
+
+      // Constrain velocity to MAX_SPEED
+      if (abs(velocity) > MAX_SPEED) {
+        velocity = velocity > 0 ? MAX_SPEED : -MAX_SPEED;
+        newX = this.prevX + velocity;
+      }
+
+      this.x = newX;
     }
   }
 

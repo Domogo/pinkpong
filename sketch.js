@@ -9,7 +9,7 @@ let shapeSize;
 const SIDE_BUFFER = 50; // Adjust this value to increase or decrease the space
 
 let leftRect, rightRect;
-const RECT_WIDTH = 50;
+const RECT_WIDTH = 60;
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
@@ -19,7 +19,7 @@ function setup() {
   let availableWidth = width - 2 * SIDE_BUFFER; // Available width for shapes
   cellWidth = availableWidth / gridCols;
   cellHeight = height / Math.floor(height / (cellWidth * 1.8));
-  shapeSize = cellWidth * 0.8;
+  shapeSize = cellWidth * 0.6;
 
   for (let col = 0; col < gridCols; col++) {
     if (col % 3 === 2) continue;

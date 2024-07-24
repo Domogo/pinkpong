@@ -74,9 +74,6 @@ function draw() {
     rightRect.checkCollision(shape);
   }
 
-  leftRect.display();
-  rightRect.display();
-
   // Change cursor if over a draggable rect
   if (leftRect.isMouseOver() || rightRect.isMouseOver()) {
     cursor(HAND);
@@ -246,10 +243,10 @@ class DraggableRect {
   }
 
   display() {
-    fill(255, 255, 255, 100);
-    noStroke();
-    rectMode(CENTER);
-    rect(this.x, this.y, this.w, this.h);
+    // fill(255, 255, 255, 100);
+    // noStroke();
+    // rectMode(CENTER);
+    // rect(this.x, this.y, this.w, this.h);
   }
 
   checkDrag(mx, my) {

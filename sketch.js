@@ -344,6 +344,29 @@ function mouseReleased() {
   rightRect.stopDrag();
 }
 
+function touchStarted() {
+  let touchX = touches[0].x;
+  let touchY = touches[0].y;
+
+  leftRect.checkDrag(touchX, touchY);
+  rightRect.checkDrag(touchX, touchY);
+
+  if (!leftRect.isDragging && !rightRect.isDragging) {
+    for (let shape of shapes) {
+      let d = dist(touchX, touchY, shape.x, shape.y);
+      if (d < FORCE_FIELD_RADIUS) {
+        let angle = atan2(shape.y - touchY, shape.x - touchX);
+        let force = map(d, 0, FORCE_FIELD_RADIUS, 15, 0);
+        let dx = cos(angle) * force;
+        let dy = sin(angle) * force;
+        shape.move(dx, dy);
+      }
+    }
+  }
+
+  return false; // prevent default behavior
+}
+
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
   shapes = [];

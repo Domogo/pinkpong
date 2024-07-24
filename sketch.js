@@ -35,7 +35,7 @@ function setup() {
           shapes.push(new CircleShape(x, y + shapeSize / 2, shapeSize / 2));
           y += shapeSize + VERTICAL_GAP;
         } else {
-          let pillHeight = 2.1 * shapeSize;
+          let pillHeight = 3 * shapeSize; // PillShape is now three times the size of CircleShape
           if (y + pillHeight <= height) {
             shapes.push(
               new PillShape(x, y + pillHeight / 2, shapeSize, pillHeight)
@@ -138,17 +138,30 @@ class CircleShape extends Shape {
         other.x += overlap * cos(angle);
         other.y += overlap * sin(angle);
       }
-    }
-    if (other instanceof PillShape) {
-      d = dist(this.x, this.y, other.x, other.y);
-      minDist = this.r + other.size + COLLISION_BUFFER;
-      if (d < minDist) {
-        angle = atan2(other.y - this.y, other.x - this.x);
-        overlap = 0.5 * (minDist - d);
-        this.x -= overlap * cos(angle);
-        this.y -= overlap * sin(angle);
-        other.x += overlap * cos(angle);
-        other.y += overlap * sin(angle);
+    } else if (other instanceof PillShape) {
+      // Circle-Rectangle collision detection
+      let closestX = constrain(
+        this.x,
+        other.x - other.size / 2,
+        other.x + other.size / 2
+      );
+      let closestY = constrain(
+        this.y,
+        other.y - other.height / 2,
+        other.y + other.height / 2
+      );
+
+      let d = dist(this.x, this.y, closestX, closestY);
+
+      if (d < this.r + COLLISION_BUFFER) {
+        let angle = atan2(this.y - other.y, this.x - other.x);
+        let overlap = (this.r + COLLISION_BUFFER - d) * 0.5;
+
+        this.x += overlap * cos(angle);
+        this.y += overlap * sin(angle);
+
+        other.x -= overlap * cos(angle);
+        other.y -= overlap * sin(angle);
       }
     }
   }
@@ -187,29 +200,65 @@ class PillShape extends Shape {
   }
 
   checkCollision(other) {
-    let d, minDist, angle, overlap;
     if (other instanceof CircleShape) {
-      d = dist(this.x, this.y, other.x, other.y);
-      minDist = this.size + other.r + COLLISION_BUFFER;
-      if (d < minDist) {
-        angle = atan2(other.y - this.y, other.x - this.x);
-        overlap = 0.5 * (minDist - d);
-        this.x -= overlap * cos(angle);
-        this.y -= overlap * sin(angle);
+      // Circle-Rectangle collision detection
+      let closestX = constrain(
+        other.x,
+        this.x - this.size / 2,
+        this.x + this.size / 2
+      );
+      let closestY = constrain(
+        other.y,
+        this.y - this.height / 2,
+        this.y + this.height / 2
+      );
+
+      let d = dist(other.x, other.y, closestX, closestY);
+
+      if (d < other.r + COLLISION_BUFFER) {
+        let angle = atan2(other.y - this.y, other.x - this.x);
+        let overlap = (other.r + COLLISION_BUFFER - d) * 0.5;
+
         other.x += overlap * cos(angle);
         other.y += overlap * sin(angle);
+
+        this.x -= overlap * cos(angle);
+        this.y -= overlap * sin(angle);
       }
-    }
-    if (other instanceof PillShape) {
-      d = dist(this.x, this.y, other.x, other.y);
-      minDist = this.size + other.size + COLLISION_BUFFER;
-      if (d < minDist) {
-        angle = atan2(other.y - this.y, other.x - this.x);
-        overlap = 0.5 * (minDist - d);
-        this.x -= overlap * cos(angle);
-        this.y -= overlap * sin(angle);
-        other.x += overlap * cos(angle);
-        other.y += overlap * sin(angle);
+    } else if (other instanceof PillShape) {
+      // Rectangle-Rectangle collision detection
+      if (
+        this.x - this.size / 2 < other.x + other.size / 2 &&
+        this.x + this.size / 2 > other.x - other.size / 2 &&
+        this.y - this.height / 2 < other.y + other.height / 2 &&
+        this.y + this.height / 2 > other.y - other.height / 2
+      ) {
+        let overlapX = min(
+          this.x + this.size / 2 - (other.x - other.size / 2),
+          other.x + other.size / 2 - (this.x - this.size / 2)
+        );
+        let overlapY = min(
+          this.y + this.height / 2 - (other.y - other.height / 2),
+          other.y + other.height / 2 - (this.y - this.height / 2)
+        );
+
+        if (overlapX < overlapY) {
+          if (this.x < other.x) {
+            this.x -= overlapX * 0.5;
+            other.x += overlapX * 0.5;
+          } else {
+            this.x += overlapX * 0.5;
+            other.x -= overlapX * 0.5;
+          }
+        } else {
+          if (this.y < other.y) {
+            this.y -= overlapY * 0.5;
+            other.y += overlapY * 0.5;
+          } else {
+            this.y += overlapY * 0.5;
+            other.y -= overlapY * 0.5;
+          }
+        }
       }
     }
   }
@@ -232,7 +281,6 @@ class PillShape extends Shape {
     }
   }
 }
-
 class DraggableRect {
   constructor(x, y, w, h) {
     this.x = x;

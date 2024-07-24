@@ -9,6 +9,8 @@ let cellWidth, cellHeight;
 let shapeSize;
 const SIDE_BUFFER = 50; // Adjust this value to increase or decrease the space
 
+const MAX_SPEED = 20;
+
 let leftRect, rightRect;
 const RECT_WIDTH = 60;
 
@@ -289,6 +291,7 @@ class DraggableRect {
     this.h = h;
     this.isDragging = false;
     this.dragOffsetX = 0;
+    this.prevX = x; // Store previous x position
   }
 
   display() {
@@ -316,6 +319,7 @@ class DraggableRect {
 
   drag(mx) {
     if (this.isDragging) {
+      this.prevX = this.x; // Update previous x position before changing
       this.x = mx - this.dragOffsetX;
       this.x = constrain(this.x, 0, width - this.w);
     }
@@ -332,9 +336,20 @@ class DraggableRect {
 
   checkCollision(shape) {
     if (shape instanceof CircleShape) {
+      this.continuousCollisionCheckCircle(shape);
+    } else if (shape instanceof PillShape) {
+      this.continuousCollisionCheckPill(shape);
+    }
+  }
+
+  continuousCollisionCheckCircle(shape) {
+    let steps = 10; // Number of steps for interpolation
+    for (let i = 0; i <= steps; i++) {
+      let interpolatedX = lerp(this.prevX, this.x, i / steps);
+
       if (
-        this.x < shape.x + shape.r &&
-        this.x + this.w > shape.x - shape.r &&
+        interpolatedX < shape.x + shape.r &&
+        interpolatedX + this.w > shape.x - shape.r &&
         this.y < shape.y + shape.r &&
         this.y + this.h > shape.y - shape.r
       ) {
@@ -345,21 +360,32 @@ class DraggableRect {
           // Left rectangle
           shape.x = this.x + this.w + shape.r;
         }
+        shape.vx = 0; // Stop the shape's horizontal velocity
+        break;
       }
-    } else if (shape instanceof PillShape) {
+    }
+  }
+
+  continuousCollisionCheckPill(shape) {
+    let steps = 10; // Number of steps for interpolation
+    for (let i = 0; i <= steps; i++) {
+      let interpolatedX = lerp(this.prevX, this.x, i / steps);
+
       if (
-        this.x < shape.x + shape.size / 2 &&
-        this.x + this.w > shape.x - shape.size / 2 &&
+        interpolatedX < shape.x + shape.size / 2 &&
+        interpolatedX + this.w > shape.x - shape.size / 2 &&
         this.y < shape.y + shape.height / 2 &&
         this.y + this.h > shape.y - shape.height / 2
       ) {
         if (this.x > width / 2) {
           // Right rectangle
-          shape.x = this.x - shape.size / 2 - COLLISION_BUFFER;
+          shape.x = this.x - this.w - shape.size / 2 - COLLISION_BUFFER;
         } else {
           // Left rectangle
           shape.x = this.x + this.w + shape.size / 2;
         }
+        shape.vx = 0; // Stop the shape's horizontal velocity
+        break;
       }
     }
   }

@@ -1,4 +1,5 @@
 const COLUMNS = 30;
+const COLUMNS_MOBILE = 10;
 const VERTICAL_GAP = 20; // Consistent vertical gap between shapes
 const FORCE_FIELD_RADIUS = 300; // Radius of the invisible force field
 const FRICTION = 0.95; // Friction coefficient to gradually stop the shapes
@@ -15,7 +16,7 @@ function setup() {
   createCanvas(windowWidth, windowHeight);
   background("#FA0041");
 
-  gridCols = COLUMNS;
+  gridCols = windowWidth >= windowHeight ? COLUMNS : COLUMNS_MOBILE;
   let availableWidth = width - 2 * SIDE_BUFFER; // Available width for shapes
   cellWidth = availableWidth / gridCols;
   cellHeight = height / Math.floor(height / (cellWidth * 1.8));

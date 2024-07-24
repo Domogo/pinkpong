@@ -123,7 +123,7 @@ class CircleShape extends Shape {
     }
     if (other instanceof PillShape) {
       d = dist(this.x, this.y, other.x, other.y);
-      minDist = this.r + other.size / 2 + COLLISION_BUFFER;
+      minDist = this.r + other.size + COLLISION_BUFFER;
       if (d < minDist) {
         angle = atan2(other.y - this.y, other.x - this.x);
         overlap = 0.5 * (minDist - d);
@@ -154,7 +154,7 @@ class PillShape extends Shape {
     let d, minDist, angle, overlap;
     if (other instanceof CircleShape) {
       d = dist(this.x, this.y, other.x, other.y);
-      minDist = this.size / 2 + other.r + COLLISION_BUFFER;
+      minDist = this.size + other.r + COLLISION_BUFFER;
       if (d < minDist) {
         angle = atan2(other.y - this.y, other.x - this.x);
         overlap = 0.5 * (minDist - d);
@@ -166,7 +166,7 @@ class PillShape extends Shape {
     }
     if (other instanceof PillShape) {
       d = dist(this.x, this.y, other.x, other.y);
-      minDist = this.size / 2 + other.size / 2 + COLLISION_BUFFER;
+      minDist = this.size + other.size + COLLISION_BUFFER;
       if (d < minDist) {
         angle = atan2(other.y - this.y, other.x - this.x);
         overlap = 0.5 * (minDist - d);

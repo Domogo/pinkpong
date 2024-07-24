@@ -92,6 +92,12 @@ class Shape {
 
     if (abs(this.vx) < 0.01) this.vx = 0;
     if (abs(this.vy) < 0.01) this.vy = 0;
+
+    this.checkEdges();
+  }
+
+  checkEdges() {
+    // Override in subclasses to handle edge collisions if needed
   }
 }
 
@@ -132,6 +138,24 @@ class CircleShape extends Shape {
         other.x += overlap * cos(angle);
         other.y += overlap * sin(angle);
       }
+    }
+  }
+
+  checkEdges() {
+    if (this.x - this.r < 0) {
+      this.x = this.r;
+      this.vx *= -1;
+    } else if (this.x + this.r > width) {
+      this.x = width - this.r;
+      this.vx *= -1;
+    }
+
+    if (this.y - this.r < 0) {
+      this.y = this.r;
+      this.vy *= -1;
+    } else if (this.y + this.r > height) {
+      this.y = height - this.r;
+      this.vy *= -1;
     }
   }
 }
@@ -175,6 +199,24 @@ class PillShape extends Shape {
         other.x += overlap * cos(angle);
         other.y += overlap * sin(angle);
       }
+    }
+  }
+
+  checkEdges() {
+    if (this.x - this.size / 2 < 0) {
+      this.x = this.size / 2;
+      this.vx *= -1;
+    } else if (this.x + this.size / 2 > width) {
+      this.x = width - this.size / 2;
+      this.vx *= -1;
+    }
+
+    if (this.y - this.height / 2 < 0) {
+      this.y = this.height / 2;
+      this.vy *= -1;
+    } else if (this.y + this.height / 2 > height) {
+      this.y = height - this.height / 2;
+      this.vy *= -1;
     }
   }
 }

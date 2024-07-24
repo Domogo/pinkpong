@@ -367,6 +367,21 @@ function touchStarted() {
   return false; // prevent default behavior
 }
 
+function touchMoved() {
+  let touchX = touches[0].x;
+  leftRect.drag(touchX);
+  rightRect.drag(touchX);
+
+  return false; // prevent default behavior
+}
+
+function touchEnded() {
+  leftRect.stopDrag();
+  rightRect.stopDrag();
+
+  return false; // prevent default behavior
+}
+
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
   shapes = [];

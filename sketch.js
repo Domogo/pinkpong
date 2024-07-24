@@ -5,7 +5,8 @@ const FORCE_FIELD_RADIUS = 300; // Radius of the invisible force field
 const FRICTION = 0.95; // Friction coefficient to gradually stop the shapes
 const COLLISION_BUFFER = 0; // Additional buffer to prevent overlap
 const MAX_SPEED = 60;
-const GRAVITY = 0.2; // Gravity force applied to shapes on collision
+// const GRAVITY = 0.2; // Gravity force applied to shapes on collision
+const GRAVITY = 0;
 const SIDE_BUFFER = 50; // Adjust this value to increase or decrease the space
 const RECT_WIDTH = 60; // Width of draggable rectangles
 
